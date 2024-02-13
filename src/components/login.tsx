@@ -7,6 +7,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { css } from '@emotion/react';
 import { BeatLoader } from 'react-spinners';
+import { useRouter } from 'next/router';
 
 interface LoginData {
   name?: string;
@@ -18,6 +19,8 @@ const Login = () => {
   const [isRegister, setRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState<LoginData>({ email: '', password: '' });
+
+  const router = useRouter();
 
   const formik = useFormik({
     initialValues: { name: '', email: '', password: '' },
@@ -31,9 +34,10 @@ const Login = () => {
       try {
         if (isRegister) {
           await signUp(values.email, values.password);
+          router.push('/home');
         } else {
         const x =  await signIn(values.email, values.password);
-        console.log(x)
+        router.push('/home');
         }
         // Handle successful authentication or registration
         console.log('Authentication successful');
