@@ -7,7 +7,7 @@ import AlbumList from '@/components/AlbumList';
 interface User {
   id: number;
   name: string;
-  albumCount: number;
+  albumCount?: number;
 }
 
 interface UserListProps {

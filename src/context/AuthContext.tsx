@@ -2,6 +2,7 @@
 import React, { FC, ReactNode, createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../app/firebase/auth';
+import { SyncLoader} from 'react-spinners';
 
 // Define the type for your user object
 interface User {
@@ -16,6 +17,14 @@ interface AuthContextProps {
 
 // Create the context with an initial value of undefined
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+export const GlobalSpinner = () => (
+  <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+  <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <SyncLoader color="#14B8A6" size={25} />
+  </div>
+</div>
+);
 
 // Create a custom hook to use the AuthContext
 export const useAuthContext = () => {
@@ -56,8 +65,7 @@ const AuthContextProvider: FC<AuthContextProviderProps> = ({ children }) => {
   // Check if loading is still true
   if (loading) {
     // Return a loading message
-    const p= <p>Loading...</p>;
-    return p;
+    return <GlobalSpinner />;
   }
 
   // Return the AuthContext.Provider with the value prop

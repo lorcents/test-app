@@ -5,20 +5,14 @@ import ImageForLargeScreen from '../assets/login.png';
 import { signIn, signUp } from '@/app/firebase/auth';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { css } from '@emotion/react';
 import { BeatLoader } from 'react-spinners';
-import { useRouter } from 'next/router';
-
-interface LoginData {
-  name?: string;
-  email: string;
-  password: string;
-}
+import { useRouter } from 'next/navigation';
+import {toast} from 'react-toastify';
+import { UserCredential } from 'firebase/auth';
 
 const Login = () => {
   const [isRegister, setRegister] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [loginData, setLoginData] = useState<LoginData>({ email: '', password: '' });
 
   const router = useRouter();
 
@@ -33,16 +27,22 @@ const Login = () => {
       setLoading(true);
       try {
         if (isRegister) {
-          await signUp(values.email, values.password);
+          const x = await signUp(values.email, values.password) as {result: UserCredential | null;
+            error: {message:string };}
+          if (x.error) throw new Error(x.error?.message)
           router.push('/home');
         } else {
-        const x =  await signIn(values.email, values.password);
+        const x =  await signIn(values.email, values.password) as {result: UserCredential | null;
+          error: {message:string };}
+        console.log(x)
+        if (x.error) throw new Error(x.error?.message)
+        
         router.push('/home');
         }
         // Handle successful authentication or registration
-        console.log('Authentication successful');
-      } catch (error) {
-        console.error('Error:', error);
+        toast.info('Authentication successful')
+      } catch (error:any) {
+        toast.error(error?.message  || 'something went wrong');
       } finally {
         setLoading(false);
       }
@@ -60,6 +60,7 @@ const Login = () => {
       </div>
 
       <div className="w-full h-screen lg:w-1/2 p-8 flex items-center justify-center">
+      <form onSubmit={formik.handleSubmit}>
         <div className="max-w-md w-full">
           <h2 className="text-2xl font-bold mb-4">Welcome</h2>
           <p className="text-xs font-bold mb-4">
@@ -117,15 +118,12 @@ const Login = () => {
           </div>
 
           <button
+          type='submit'
             className="bg-teal-500 text-white py-2 px-4 rounded-md w-80"
-            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                e.preventDefault();
-                formik.handleSubmit(e);
-              }}
             disabled={loading}
           >
             {loading ? (
-              <BeatLoader color="#ffffff" loading={loading} css={css`display: flex; margin: 0 auto;`} />
+              <BeatLoader color="#ffffff" loading={loading}  />
             ) : (
               isRegister ? 'Sign Up' : 'Login'
             )}
@@ -140,6 +138,7 @@ const Login = () => {
             </button>
           </p>
         </div>
+        </form>
       </div>
     </div>
   );
