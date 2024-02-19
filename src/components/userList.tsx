@@ -46,10 +46,10 @@ const UserList: React.FC<UserListProps> = ({ users, selectedUser, onUserClick, u
 
       {/* UserList overlay that slides in from the left on mobile and tablet */}
       <div
-        className={`fixed inset-0 bg-white z-50 transform transition-transform ease-in-out ${
-          isExpanded ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0 md:static md:overflow-auto border-r border-gray-300 p-4`}
-      >
+  className={`fixed inset-0 bg-white z-50 transform transition-transform ease-in-out ${
+    isExpanded ? 'translate-x-0' : '-translate-x-full'
+  } md:translate-x-0 md:static md:overflow-auto border-r border-gray-300 p-4 overflow-y-auto max-h-full`}
+>
         <div className="grid grid-cols-1  lg:grid-cols-2 xl:grid-cols-2 gap-4">
           {users.map((user) => (
             <div
