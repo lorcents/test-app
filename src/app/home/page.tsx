@@ -3,25 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import UserList from '@/components/userList';
 import AlbumList from '@/components/AlbumList';
+import { useAuthContext,GlobalSpinner } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'react-feather';
+import { User } from 'firebase/auth';
 
-interface User {
+interface UserInterface {
   id: number;
   name: string;
   albumCount?: number;
 }
 
 interface UserListProps {
-  users: User[];
-  selectedUser: User | null;
-  onUserClick: (user: User) => void;
+  users: UserInterface[];
+  selectedUser: UserInterface | null;
+  onUserClick: (user: UserInterface) => void;
 }
 
-const HomePage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+const HomePage = () => {
+  const route = useRouter()
+  const { user, loading } = useAuthContext() as {user:User,loading:boolean}
+  const [Loading,setLoading] = useState(false)
+ 
+  const [users, setUsers] = useState<UserInterface[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserInterface | null>(null);
   const [selectedUserAlbums, setSelectedUserAlbums] = useState<any[]>([]);
+  const [isExpanded, setExpanded] = useState(false);
 
   const fetchUsers = async () => {
+    setLoading(true);
     const response = await fetch('https://jsonplaceholder.typicode.com/users');
     const data = await response.json();
 
@@ -39,7 +49,9 @@ const HomePage: React.FC = () => {
     );
 
     setUsers(usersWithAlbums);
-    setSelectedUser(usersWithAlbums[0]); // Select the first user by default
+    setSelectedUser(usersWithAlbums[0]);
+     // Select the first user by default
+     setLoading(false)
   };
 
   useEffect(() => {
@@ -58,15 +70,44 @@ const HomePage: React.FC = () => {
     fetchUserAlbums();
   }, [selectedUser]);
 
-  const handleUserClick = (user: User) => {
+  const handleUserClick = (user: UserInterface) => {
     setSelectedUser(user);
+    handleToggleExpand()
   };
 
+  const handleToggleExpand = () => {
+    setExpanded(!isExpanded);
+  };
+
+  if (loading || Loading ) {
+    return <GlobalSpinner />;
+  }
+
+  if (!user && !loading ) {
+    route.replace('/')
+    return
+    
+  }
+
   return (
-    <div className="flex">
-      <UserList users={users} selectedUser={selectedUser} onUserClick={handleUserClick} />
+    Loading ? GlobalSpinner :
+   ( <div className="flex">
+      <UserList users={users} selectedUser={selectedUser} onUserClick={handleUserClick} user={user} isExpanded={isExpanded} />
+      <div>
+        {/* Toggle button for UserList on mobile and tablet */}
+        <button
+          className="p-2 bg-teal-500 text-white rounded lg:hidden"
+          onClick={handleToggleExpand}
+        >
+          {isExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+        </button>
+        <p className=" italic text-center font-bold text-2xl text-teal-500 my-4">
+  {selectedUser?.name} Albums
+   </p>
       <AlbumList albums={selectedUserAlbums} />
-    </div>
+      </div>
+      
+    </div>)
   );
 };
 

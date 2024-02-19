@@ -1,18 +1,19 @@
 'use client'
 import React, { FC, ReactNode, createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { User, UserCredential, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../app/firebase/auth';
 import { SyncLoader} from 'react-spinners';
 
 // Define the type for your user object
-interface User {
-  uid: string;
-  // Add other properties as needed
-}
+// interface User {
+//   uid: string;
+//   // Add other properties as needed
+// }
 
 // Define the type for your context
 interface AuthContextProps {
   user: User | null;
+  loading: boolean;
 }
 
 // Create the context with an initial value of undefined
@@ -48,11 +49,11 @@ const AuthContextProvider: FC<AuthContextProviderProps> = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         // Map Firebase auth user to your User type
-        const mappedUser: User = {
-          uid: authUser.uid,
-          // Add other properties as needed
-        };
-        setUser(mappedUser);
+        // const mappedUser: User = {
+        //   uid: authUser.uid,
+        //   // Add other properties as needed
+        // };
+        setUser(authUser);
       } else {
         setUser(null);
       }
@@ -70,7 +71,7 @@ const AuthContextProvider: FC<AuthContextProviderProps> = ({ children }) => {
 
   // Return the AuthContext.Provider with the value prop
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user,loading }}>
       {children}
     </AuthContext.Provider>
   );
